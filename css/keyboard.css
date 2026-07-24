@@ -1,0 +1,224 @@
+/* ==========================================================================
+   keyboard.css  —  Premium staggered QWERTY keyboard.
+
+   Architecture:
+   • .practice-keyboard-wrap  flex child inside .practice-session
+   • .spell-keyboard          3-row flex column container
+   • .kbd-row                 horizontal flex row
+   • .kbd-spacer              invisible stagger offset (no interaction)
+   • .kbd-key                 letter key (flex:1)
+   • .kbd-key--action         backspace key (flex:1.5, far right of row 3)
+   • .kbd-key.is-active       accent-colour pressed state
+
+   All colours use CSS custom properties → fully theme-aware.
+   Stagger: Row 2 indent 0.5 unit, Row 3 indent 0.75 unit.
+   ========================================================================== */
+
+/* ── Wrapper ─────────────────────────────────────────────────────────────── */
+.practice-keyboard-wrap {
+  flex-shrink: 0;
+  padding-top: var(--space-3);
+  /* small top separator from input area */
+  border-top: 1px solid var(--border-subtle);
+  margin-top: var(--space-3);
+}
+
+/* ── Keyboard container ──────────────────────────────────────────────────── */
+.spell-keyboard {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: var(--space-3) 0 var(--space-2);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ── Rows ────────────────────────────────────────────────────────────────── */
+.kbd-row {
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  gap: 6px;
+}
+
+/* ── Invisible stagger spacers ───────────────────────────────────────────── */
+.kbd-spacer {
+  display: block;
+  flex-shrink: 0;
+  pointer-events: none;
+  /* flex value set inline via JS */
+}
+
+/* ── Base key ────────────────────────────────────────────────────────────── */
+.kbd-key {
+  /* Sizing — flex:1 makes all keys in a row equal width */
+  flex: 1;
+  min-width: 0;
+  max-width: 56px;
+  height: clamp(44px, 12vw, 58px);
+
+  /* Visual */
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: 9px;
+  /* Raised 3-D effect via box-shadow bottom edge */
+  box-shadow:
+    0 3px 0 var(--border-strong),
+    0 1px 3px rgba(0, 0, 0, 0.06);
+
+  /* Typography */
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: clamp(13px, 3.8vw, 16px);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  line-height: 1;
+
+  /* Layout */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* Interaction */
+  cursor: pointer;
+  touch-action: manipulation;       /* prevents double-tap zoom, no preventDefault needed */
+  -webkit-tap-highlight-color: transparent;
+
+  /* Transitions — fast press, smooth release */
+  transition:
+    background-color 60ms ease,
+    color            60ms ease,
+    border-color     60ms ease,
+    box-shadow      100ms ease,
+    transform       100ms ease;
+}
+
+/* ── Hover (pointer devices only — avoids sticky hover on touch) ─────────── */
+@media (hover: hover) {
+  .kbd-key:hover {
+    background: var(--bg-surface-raised);
+    border-color: var(--border-strong);
+  }
+}
+
+/* ── Pressed state: ACCENT COLOUR highlight ──────────────────────────────── */
+/*    Added on pointerdown via JS, removed ~100ms after click.               */
+/*    !important overrides dark-mode background overrides cleanly.           */
+.kbd-key.is-active {
+  background:   var(--accent) !important;
+  color:        var(--text-on-accent) !important;
+  border-color: var(--accent-strong)  !important;
+  box-shadow:
+    0 1px 0 var(--accent-strong),
+    0 0 0 transparent !important;
+  transform: scale(0.93) translateY(2px);
+}
+
+/* ── Backspace / action key ──────────────────────────────────────────────── */
+.kbd-key--action {
+  flex: 1.5;         /* wider than a letter key */
+  max-width: 76px;
+  color: var(--text-secondary);
+  border-color: var(--border-default);
+  /* slightly lighter background to visually differentiate */
+  background: var(--bg-surface-sunken);
+}
+
+@media (hover: hover) {
+  .kbd-key--action:hover {
+    background: var(--bg-surface);
+    color: var(--text-primary);
+  }
+}
+
+.kbd-key--action.is-active {
+  color: var(--text-on-accent) !important;
+}
+
+/* Backspace SVG icon */
+.kbd-key--action svg {
+  width: clamp(17px, 4.8vw, 22px);
+  height: clamp(17px, 4.8vw, 22px);
+  stroke: currentColor;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+/* ── Dark theme ──────────────────────────────────────────────────────────── */
+html[data-theme="dark"] .kbd-key {
+  background: var(--bg-surface-raised);
+  border-color: var(--border-default);
+  box-shadow:
+    0 3px 0 rgba(0, 0, 0, 0.55),
+    0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+@media (hover: hover) {
+  html[data-theme="dark"] .kbd-key:hover {
+    background: var(--bg-surface);
+    border-color: var(--border-strong);
+  }
+}
+
+html[data-theme="dark"] .kbd-key--action {
+  background: var(--bg-surface);
+}
+
+html[data-theme="dark"] .kbd-key.is-active {
+  box-shadow:
+    0 1px 0 var(--accent-strong),
+    0 0 0 transparent !important;
+}
+
+/* ── Short screens — landscape phones ───────────────────────────────────── */
+@media (max-height: 640px) {
+  .spell-keyboard            { gap: 5px; padding: var(--space-2) 0 var(--space-1); }
+  .kbd-row                   { gap: 5px; }
+  .kbd-key                   { height: clamp(36px, 10vw, 46px); }
+  .practice-keyboard-wrap    { padding-top: var(--space-2); margin-top: var(--space-2); }
+}
+
+@media (max-height: 500px) {
+  .spell-keyboard            { gap: 3px; padding: 4px 0 2px; }
+  .kbd-row                   { gap: 4px; }
+  .kbd-key                   {
+    height: 34px;
+    font-size: 13px;
+    border-radius: 6px;
+    box-shadow: 0 2px 0 var(--border-strong);
+  }
+  .kbd-key--action           { max-width: 64px; }
+  .kbd-key--action svg       { width: 15px; height: 15px; }
+  .practice-keyboard-wrap    { padding-top: var(--space-1); margin-top: var(--space-1); }
+  html[data-theme="dark"] .kbd-key { box-shadow: 0 2px 0 rgba(0,0,0,0.55); }
+}
+
+/* ── Large phones ────────────────────────────────────────────────────────── */
+@media (min-width: 480px) {
+  .kbd-row                   { gap: 7px; }
+  .kbd-key                   { max-width: 62px; height: clamp(46px, 10.5vw, 58px); }
+  .kbd-key--action           { max-width: 86px; }
+  .spell-keyboard            { gap: 9px; }
+}
+
+/* ── Desktop ─────────────────────────────────────────────────────────────── */
+@media (min-width: 880px) {
+  .kbd-row                   { gap: 8px; }
+  .kbd-key                   {
+    max-width: 64px;
+    height: 56px;
+    font-size: 15px;
+    border-radius: 10px;
+    box-shadow: 0 3px 0 var(--border-strong), 0 1px 4px rgba(0,0,0,0.07);
+  }
+  .kbd-key--action           { max-width: 92px; }
+  .spell-keyboard            { gap: 10px; padding: var(--space-4) 0 var(--space-3); }
+  html[data-theme="dark"] .kbd-key {
+    box-shadow: 0 3px 0 rgba(0,0,0,0.55), 0 1px 4px rgba(0,0,0,0.3);
+  }
+}
